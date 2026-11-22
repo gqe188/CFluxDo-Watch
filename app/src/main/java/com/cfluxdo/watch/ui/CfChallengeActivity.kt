@@ -3,6 +3,7 @@ package com.cfluxdo.watch.ui
 import android.annotation.SuppressLint
 import android.net.http.SslError
 import android.os.Bundle
+import android.view.MotionEvent
 import android.webkit.CookieManager
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
@@ -45,6 +46,7 @@ class CfChallengeActivity : AppCompatActivity() {
 
         val wv = findViewById<WebView>(R.id.webView)
         webView = wv
+        RotaryHelper.attachToWebView(wv)
 
         wv.settings.apply {
             javaScriptEnabled = true
@@ -125,6 +127,25 @@ class CfChallengeActivity : AppCompatActivity() {
             return raw.contains("cf_clearance=") || raw.contains("_t=")
         }
         return false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        RotaryHelper.ensureFocus(webView)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            RotaryHelper.ensureFocus(webView)
+        }
+    }
+
+    override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
+        if (RotaryHelper.handleActivityGenericMotion(webView, event)) {
+            return true
+        }
+        return super.onGenericMotionEvent(event)
     }
 
     override fun onDestroy() {

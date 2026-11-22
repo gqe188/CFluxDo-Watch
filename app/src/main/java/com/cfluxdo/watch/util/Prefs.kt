@@ -54,6 +54,15 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("auto_load_images", false)
         set(v) = sp.edit().putBoolean("auto_load_images", v).apply()
 
+    // Rotary crown preferences for OPPO Watch / Wear OS
+    var rotaryHaptics: Boolean
+        get() = sp.getBoolean("rotary_haptics", true)
+        set(v) = sp.edit().putBoolean("rotary_haptics", v).apply()
+
+    var rotaryReverse: Boolean
+        get() = sp.getBoolean("rotary_reverse", false)
+        set(v) = sp.edit().putBoolean("rotary_reverse", v).apply()
+
     var cachedUsername: String?
         get() = sp.getString("username", null)
         set(v) = sp.edit().putString("username", v).apply()

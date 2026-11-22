@@ -13,8 +13,8 @@ android {
         // Compatible with OPPO Watch X2 (ColorOS Watch 7.0 / Wear OS 5) and older Wear OS watches
         minSdk = 26
         targetSdk = 34
-        versionCode = 100
-        versionName = "1.0.0-watch"
+        versionCode = 101
+        versionName = "1.0.1-watch"
 
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")
@@ -27,6 +27,18 @@ android {
         }
     }
 
+    signingConfigs {
+        val ksPath = System.getenv("KEYSTORE_PATH")
+        if (!ksPath.isNullOrBlank() && file(ksPath).exists()) {
+            create("release") {
+                storeFile = file(ksPath)
+                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: ""
+                keyAlias = System.getenv("KEY_ALIAS") ?: ""
+                keyPassword = System.getenv("KEY_PASSWORD") ?: ""
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -35,8 +47,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Sign with debug key so the release APK is immediately installable via adb
-            signingConfig = signingConfigs.getByName("debug")
+            // Use CI/release keystore if provided via env, otherwise sign with debug key for direct ADB install
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
         debug {
             isMinifyEnabled = false

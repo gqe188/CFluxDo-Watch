@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -54,6 +55,25 @@ class CategoriesActivity : AppCompatActivity() {
                 adapter.notifyDataSetChanged()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        RotaryHelper.ensureFocus(recyclerView)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            RotaryHelper.ensureFocus(recyclerView)
+        }
+    }
+
+    override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
+        if (RotaryHelper.handleActivityGenericMotion(recyclerView, event)) {
+            return true
+        }
+        return super.onGenericMotionEvent(event)
     }
 
     override fun onDestroy() {

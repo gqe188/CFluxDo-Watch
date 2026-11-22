@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -83,6 +84,7 @@ class MainActivity : AppCompatActivity() {
         swipeRefresh = findViewById(R.id.swipeRefresh)
         recyclerView = findViewById(R.id.recyclerView)
 
+        swipeRefresh.isFocusable = false
         swipeRefresh.setColorSchemeColors(ContextCompat.getColor(this, R.color.accent))
         swipeRefresh.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(this, R.color.surface_card))
         swipeRefresh.setOnRefreshListener { loadFirstPage() }
@@ -129,7 +131,21 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         adapter.notifyItemChanged(0)
-        recyclerView.requestFocus()
+        RotaryHelper.ensureFocus(recyclerView)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            RotaryHelper.ensureFocus(recyclerView)
+        }
+    }
+
+    override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
+        if (RotaryHelper.handleActivityGenericMotion(recyclerView, event)) {
+            return true
+        }
+        return super.onGenericMotionEvent(event)
     }
 
     override fun onDestroy() {

@@ -8,6 +8,8 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:clipToPadding="false"
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
@@ -15,6 +17,9 @@
         android:paddingBottom="56dp"
         android:scrollbars="vertical"
         android:scrollbarSize="2dp"
-        android:overScrollMode="never" />
+        android:overScrollMode="never">
+
+        <requestFocus />
+    </androidx.recyclerview.widget.RecyclerView>
 
 </FrameLayout>

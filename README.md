@@ -1,5 +1,6 @@
 # CFluxDo Watch（OPPO Watch X2 精简原生移植版）
 
+[![Build APK](https://github.com/gqe188/CFluxDo-Watch/actions/workflows/build.yml/badge.svg)](https://github.com/gqe188/CFluxDo-Watch/actions/workflows/build.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/gqe188/CFluxDo-Watch?style=flat-square&logo=github&label=Release)](https://github.com/gqe188/CFluxDo-Watch/releases)
 [![Upstream](https://img.shields.io/badge/Upstream-1molchuan%2FCFluxDo-blue?style=flat-square&logo=github)](https://github.com/1molchuan/CFluxDo)
 [![Platform](https://img.shields.io/badge/Platform-Wear%20OS%20%2F%20ColorOS%20Watch-3DDC84?style=flat-square&logo=android&logoColor=white)](#安装到手表)
@@ -43,7 +44,7 @@
 
 ### 4. 专为圆形表盘优化的阅读与交互体验
 - **圆形屏幕安全边距**：列表上下留白配合 `clipToPadding="false"`，首尾卡片均可顺滑滚动至圆形屏幕最宽区域，避免圆角裁切。
-- **原生旋转表冠支持**：话题列表、分类列表、帖子详情页、设置页及扫码页均原生适配旋转表冠（Rotary Encoder）顺滑滚动。
+- **OPPO Watch 旋转表冠（滚轮）深度适配**：遵循 Wear OS / Android 官方旋转编码器规范（`SOURCE_ROTARY_ENCODER` + `AXIS_SCROLL` / `AXIS_VSCROLL` 双轴兼容 + `ViewConfigurationCompat` 系统滚动因子 + 亚像素累积防丢脉冲），覆盖全应用所有页面（含 Cloudflare 过盾页）及 Activity 级焦点兜底，并适配 Android 14 / Wear OS 5 线性马达机械刻度震动反馈与触顶/触底反馈（设置中支持开关表冠震动与反转滚动方向）。
 - **原生富文本帖子阅读**：基于 Jsoup + 原生 `View` / `Spanned` 渲染，支持段落、链接、引用块、横向滚动代码块、可折叠 Spoiler/Details、楼层自动分页加载、**仅看楼主**、**A-/A+ 实时调节字号**、**帖子点赞**，以及 **最新 / 热门 / 未读 / 分类** 切换。
 
 ---
@@ -127,6 +128,12 @@
    ```
 
 > 注：本项目已包含直接取自 `1molchuan/CFluxDo 1.3.4` 的预编译 `libdoh_proxy.so`（`arm64-v8a` / `armeabi-v7a`），无需本机配置 Rust 工具链即可直接编译 APK。如需自行从源码编译 `libdoh_proxy.so`，请前往上游仓库 [1molchuan/fluxdo_doh](https://github.com/1molchuan/fluxdo_doh)（`cfluxdo` 分支）。
+
+### GitHub Actions 自动编译与发版
+本仓库已配置 [`.github/workflows/build.yml`](.github/workflows/build.yml)：
+- 每次推送到 `main`、发起 PR 或在 Actions 页面手动触发（`workflow_dispatch`）时，自动运行单元测试并构建 3 个架构的 Release APK 与 `SHA256SUMS.txt` 上传至 Artifacts。
+- 推送 `v*` 标签（如 `git tag v1.0.1-watch && git push origin v1.0.1-watch`）时，自动创建/更新对应 GitHub Release 并附带全部 APK。
+- 如需固定正式签名，可在仓库 Settings → Secrets 中配置 `KEYSTORE_BASE64`、`KEYSTORE_PASSWORD`、`KEY_ALIAS`、`KEY_PASSWORD`（未配置时默认使用 debug 签名以便直接 ADB 安装）。
 
 ---
 

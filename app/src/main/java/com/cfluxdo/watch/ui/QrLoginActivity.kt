@@ -1,6 +1,7 @@
 package com.cfluxdo.watch.ui
 
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -85,6 +86,25 @@ class QrLoginActivity : AppCompatActivity() {
         } else {
             startPhoneScanWatchMode()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        RotaryHelper.ensureFocus(scrollView)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            RotaryHelper.ensureFocus(scrollView)
+        }
+    }
+
+    override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
+        if (RotaryHelper.handleActivityGenericMotion(scrollView, event)) {
+            return true
+        }
+        return super.onGenericMotionEvent(event)
     }
 
     override fun onDestroy() {

@@ -7,6 +7,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -98,6 +99,25 @@ class TopicDetailActivity : AppCompatActivity() {
         })
 
         loadTopic()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        RotaryHelper.ensureFocus(recyclerView)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            RotaryHelper.ensureFocus(recyclerView)
+        }
+    }
+
+    override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
+        if (RotaryHelper.handleActivityGenericMotion(recyclerView, event)) {
+            return true
+        }
+        return super.onGenericMotionEvent(event)
     }
 
     override fun onDestroy() {

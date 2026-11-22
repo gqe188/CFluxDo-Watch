@@ -3,6 +3,7 @@ package com.cfluxdo.watch.ui
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.view.MotionEvent
 import android.widget.EditText
 import android.widget.ScrollView
 import android.widget.TextView
@@ -35,6 +36,8 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnCustomNode: TextView
     private lateinit var btnCycleFontSize: TextView
     private lateinit var btnToggleAutoImage: TextView
+    private lateinit var btnToggleRotaryHaptics: TextView
+    private lateinit var btnToggleRotaryReverse: TextView
     private lateinit var btnManualCf: TextView
     private lateinit var btnClearCache: TextView
     private lateinit var tvVersionInfo: TextView
@@ -54,6 +57,8 @@ class SettingsActivity : AppCompatActivity() {
         btnCustomNode = findViewById(R.id.btnCustomNode)
         btnCycleFontSize = findViewById(R.id.btnCycleFontSize)
         btnToggleAutoImage = findViewById(R.id.btnToggleAutoImage)
+        btnToggleRotaryHaptics = findViewById(R.id.btnToggleRotaryHaptics)
+        btnToggleRotaryReverse = findViewById(R.id.btnToggleRotaryReverse)
         btnManualCf = findViewById(R.id.btnManualCf)
         btnClearCache = findViewById(R.id.btnClearCache)
         tvVersionInfo = findViewById(R.id.tvVersionInfo)
@@ -111,6 +116,16 @@ class SettingsActivity : AppCompatActivity() {
             refreshUi()
         }
 
+        btnToggleRotaryHaptics.setOnClickListener {
+            app.prefs.rotaryHaptics = !app.prefs.rotaryHaptics
+            refreshUi()
+        }
+
+        btnToggleRotaryReverse.setOnClickListener {
+            app.prefs.rotaryReverse = !app.prefs.rotaryReverse
+            refreshUi()
+        }
+
         btnManualCf.setOnClickListener {
             startActivity(Intent(this, CfChallengeActivity::class.java))
         }
@@ -125,8 +140,32 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        tvVersionInfo.text = "CFluxDo Watch 1.0.0 · 原生低功耗版\n核心网络引擎来自 1molchuan/CFluxDo"
+        val ver = try {
+            packageManager.getPackageInfo(packageName, 0).versionName ?: "1.0.1-watch"
+        } catch (_: Exception) {
+            "1.0.1-watch"
+        }
+        tvVersionInfo.text = "CFluxDo Watch $ver · 原生低功耗版\n核心网络引擎来自 1molchuan/CFluxDo"
         refreshUi()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        RotaryHelper.ensureFocus(scrollView)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            RotaryHelper.ensureFocus(scrollView)
+        }
+    }
+
+    override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
+        if (RotaryHelper.handleActivityGenericMotion(scrollView, event)) {
+            return true
+        }
+        return super.onGenericMotionEvent(event)
     }
 
     override fun onDestroy() {
@@ -212,6 +251,8 @@ class SettingsActivity : AppCompatActivity() {
 
             btnCycleFontSize.text = "阅读字号：${app.prefs.fontSizeSp}sp"
             btnToggleAutoImage.text = "图片加载：${if (app.prefs.autoLoadImages) "自动小图" else "点击加载（最省电）"}"
+            btnToggleRotaryHaptics.text = "表冠震动反馈：${if (app.prefs.rotaryHaptics) "开启" else "关闭"}"
+            btnToggleRotaryReverse.text = "表冠滚动方向：${if (app.prefs.rotaryReverse) "反向" else "默认"}"
         }
     }
 }
