@@ -23,7 +23,7 @@
 - **纯原生 Android Kotlin + RecyclerView**：彻底移除 Flutter 引擎、Dart VM、QuickJS、音视频解码器、后台保活服务、MessageBus 轮询与 WebView 正文渲染，常驻内存大幅降低，闲置 CPU 占用接近 0%。
 - **AMOLED 纯黑省电主题**：`#000000` 纯黑底色搭配暖墨纸色正文（`#EDE9E0`），充分利用 LTPO OLED 像素熄灭特性降低功耗。
 - **按需图片加载**：默认采用「点击加载图片」省电模式（可在设置中切换自动加载），图片解码使用 `RGB_565`（内存减半）配合手表分辨率下采样，缓存上限严格控制在 `4 MB`，支持点击全屏查看。
-- **按需 WebView 过盾**：日常浏览完全不初始化 WebView（零常驻 WebView 内存占用）；仅在触发 Cloudflare 人机验证时临时拉起并走同一本地网关，验证完成后即彻底 `destroy()`。
+- **按需 WebView 过盾 + 老旧 WebView 同 Wi-Fi 凭证同步**：平时不初始化 WebView（零常驻 WebView 内存占用）；仅在触发 Cloudflare 验证时临时拉起并走同一本地网关，退出即彻底 `destroy()`。针对部分手表系统内置 WebView 过旧（如 Chromium 83）难以完成验证的问题，自动提示并提供 **「同 Wi-Fi 电脑/手机同步 `cf_clearance` + `User-Agent`」** 通道，自动对齐浏览器 `sec-ch-ua` 请求头与本地网关指纹。
 
 ### 2. 完整保留 CFluxDo 核心网络访问能力
 - 通过轻量 C JNI 桥接层（`libdoh_jni.so`）直接调用上游 `1molchuan/CFluxDo 1.3.4` 的 Rust 核心库 `libdoh_proxy.so`（同时提供 `arm64-v8a` 与 `armeabi-v7a`）。

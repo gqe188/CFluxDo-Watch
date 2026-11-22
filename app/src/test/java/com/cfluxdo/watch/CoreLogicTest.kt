@@ -17,7 +17,28 @@ class CoreLogicTest {
         assertEquals("?1", hints["sec-ch-ua-mobile"])
         assertEquals("\"Android\"", hints["sec-ch-ua-platform"])
         assertTrue(hints["sec-ch-ua"]!!.contains("\"Chromium\";v=\"131\""))
-        assertTrue(hints["sec-ch-ua"]!!.contains("\"Android WebView\";v=\"131\""))
+        assertTrue(hints["sec-ch-ua"]!!.contains("\"Google Chrome\";v=\"131\""))
+
+        val winEdgeUa = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0"
+        val edgeHints = ClientHints.headersFor(winEdgeUa)
+        assertEquals("?0", edgeHints["sec-ch-ua-mobile"])
+        assertEquals("\"Windows\"", edgeHints["sec-ch-ua-platform"])
+        assertTrue(edgeHints["sec-ch-ua"]!!.contains("\"Microsoft Edge\";v=\"134\""))
+
+        val webViewUa = "Mozilla/5.0 (Linux; Android 14; Watch; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.120 Mobile Safari/537.36"
+        assertEquals(83, ClientHints.extractChromeMajor(webViewUa))
+        assertTrue(ClientHints.headersFor(webViewUa)["sec-ch-ua"]!!.contains("\"Android WebView\";v=\"83\""))
+    }
+
+    @Test
+    fun cfClearanceExtractionHandlesRawAndCookieHeader() {
+        assertEquals("abc.def-173", ClientHints.extractCfClearanceValue("abc.def-173"))
+        assertEquals("abc.def-173", ClientHints.extractCfClearanceValue("cf_clearance=abc.def-173"))
+        assertEquals(
+            "xyz.987-174",
+            ClientHints.extractCfClearanceValue("Cookie: _t=tok123; cf_clearance=xyz.987-174; _forum_session=aaa")
+        )
+        assertEquals(null, ClientHints.extractCfClearanceValue("_t=only_token"))
     }
 
     @Test

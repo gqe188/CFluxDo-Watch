@@ -106,6 +106,14 @@
                 android:layout_marginBottom="6dp" />
 
             <TextView
+                android:id="@+id/btnLanCfSync"
+                style="@style/WatchPillButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="同 Wi-Fi 同步 CF 凭证"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
                 android:id="@+id/btnLogout"
                 style="@style/WatchPillButton"
                 android:layout_width="wrap_content"

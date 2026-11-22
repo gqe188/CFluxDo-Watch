@@ -49,10 +49,35 @@ class DiscourseClient(
         return ClientHints.defaultUserAgent()
     }
 
-    fun updateUserAgent(rawUa: String) {
+    fun updateUserAgent(rawUa: String): String {
         val sanitized = ClientHints.sanitizeUserAgent(rawUa)
         prefs.cachedUserAgent = sanitized
+        return sanitized
     }
+
+    fun setExactUserAgent(ua: String) {
+        val clean = ua.trim()
+        if (clean.isNotEmpty()) {
+            prefs.cachedUserAgent = clean
+        }
+    }
+
+    /**
+     * Applies a cf_clearance cookie + matching browser User-Agent synced from a same-Wi-Fi PC/phone
+     * browser and restarts the local Rust gateway so TLS/HTTP2 & Client Hints align immediately.
+     */
+    suspend fun applySyncedCfCredentials(rawCfInput: String, syncedUserAgent: String?): String =
+        withContext(Dispatchers.IO) {
+            val cfVal = ClientHints.extractCfClearanceValue(rawCfInput)
+                ?: throw IllegalArgumentException("未识别到有效的 cf_clearance 值")
+            cookieStore.setCookie("cf_clearance", cfVal, BASE_HOST)
+            val ua = syncedUserAgent?.trim()?.takeIf { it.isNotEmpty() }
+            if (ua != null) {
+                setExactUserAgent(ua)
+                gateway.startOrRestart(ua)
+            }
+            cfVal
+        }
 
     private val gatewayAndCookieInterceptor = Interceptor { chain ->
         val origRequest = chain.request()

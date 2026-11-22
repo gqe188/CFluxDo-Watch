@@ -165,14 +165,25 @@
 
         <!-- CF challenge & cache -->
         <TextView
-            android:id="@+id/btnManualCf"
+            android:id="@+id/btnLanCfSync"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card"
             android:padding="10dp"
             android:textColor="@color/accent"
             android:textSize="12sp"
-            android:text="手动 Cloudflare 过盾"
+            android:text="同 Wi-Fi 同步 CF 凭证（电脑/手机过盾）"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/btnManualCf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:padding="10dp"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:text="手表内置 WebView 过盾"
             android:layout_marginBottom="6dp" />
 
         <TextView

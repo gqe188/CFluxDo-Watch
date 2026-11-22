@@ -120,7 +120,12 @@ class DohGatewayManager(
             if (userAgent.isNotBlank()) {
                 put("webview_user_agent", userAgent)
             }
-            put("app_version", "1.0.0-watch")
+            val appVer = try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.2-watch"
+            } catch (_: Exception) {
+                "1.0.2-watch"
+            }
+            put("app_version", appVer)
         }
 
         val port = DohProxyNative.nativeStartWithConfigJson(config.toString())

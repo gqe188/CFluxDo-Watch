@@ -38,6 +38,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnToggleAutoImage: TextView
     private lateinit var btnToggleRotaryHaptics: TextView
     private lateinit var btnToggleRotaryReverse: TextView
+    private lateinit var btnLanCfSync: TextView
     private lateinit var btnManualCf: TextView
     private lateinit var btnClearCache: TextView
     private lateinit var tvVersionInfo: TextView
@@ -59,6 +60,7 @@ class SettingsActivity : AppCompatActivity() {
         btnToggleAutoImage = findViewById(R.id.btnToggleAutoImage)
         btnToggleRotaryHaptics = findViewById(R.id.btnToggleRotaryHaptics)
         btnToggleRotaryReverse = findViewById(R.id.btnToggleRotaryReverse)
+        btnLanCfSync = findViewById(R.id.btnLanCfSync)
         btnManualCf = findViewById(R.id.btnManualCf)
         btnClearCache = findViewById(R.id.btnClearCache)
         tvVersionInfo = findViewById(R.id.tvVersionInfo)
@@ -124,6 +126,15 @@ class SettingsActivity : AppCompatActivity() {
         btnToggleRotaryReverse.setOnClickListener {
             app.prefs.rotaryReverse = !app.prefs.rotaryReverse
             refreshUi()
+        }
+
+        btnLanCfSync.setOnClickListener {
+            startActivity(
+                Intent(this, QrLoginActivity::class.java).putExtra(
+                    QrLoginActivity.EXTRA_MODE,
+                    QrLoginActivity.MODE_CF_SYNC
+                )
+            )
         }
 
         btnManualCf.setOnClickListener {

@@ -35,6 +35,12 @@ import kotlinx.coroutines.withContext
  */
 class QrLoginActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_MODE = "mode"
+        const val MODE_LOGIN = "login"
+        const val MODE_CF_SYNC = "cf_sync"
+    }
+
     private val uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val app get() = WatchApp.instance
 
@@ -48,6 +54,7 @@ class QrLoginActivity : AppCompatActivity() {
     private lateinit var loggedInPanel: LinearLayout
     private lateinit var tvLoggedInUser: TextView
     private lateinit var btnShareQr: TextView
+    private lateinit var btnLanCfSync: TextView
     private lateinit var btnLogout: TextView
     private lateinit var btnQrAction: TextView
 
@@ -73,18 +80,23 @@ class QrLoginActivity : AppCompatActivity() {
         loggedInPanel = findViewById(R.id.loggedInPanel)
         tvLoggedInUser = findViewById(R.id.tvLoggedInUser)
         btnShareQr = findViewById(R.id.btnShareQr)
+        btnLanCfSync = findViewById(R.id.btnLanCfSync)
         btnLogout = findViewById(R.id.btnLogout)
         btnQrAction = findViewById(R.id.btnQrAction)
 
         RotaryHelper.attachToScrollView(scrollView)
 
         btnShareQr.setOnClickListener { generateShareQr() }
+        btnLanCfSync.setOnClickListener { startLanServerMode(cfSyncFirst = true) }
         btnLogout.setOnClickListener { performLogout() }
 
-        if (app.cookieStore.hasLoginSession()) {
+        val mode = intent.getStringExtra(EXTRA_MODE) ?: MODE_LOGIN
+        if (mode == MODE_CF_SYNC) {
+            startLanServerMode(cfSyncFirst = true)
+        } else if (app.cookieStore.hasLoginSession()) {
             showLoggedInState()
         } else {
-            startPhoneScanWatchMode()
+            startLanServerMode(cfSyncFirst = false)
         }
     }
 
@@ -124,17 +136,23 @@ class QrLoginActivity : AppCompatActivity() {
         uiScope.cancel()
     }
 
-    private fun startPhoneScanWatchMode() {
+    private fun startLanServerMode(cfSyncFirst: Boolean) {
         loggedInPanel.visibility = View.GONE
-        tvQrTitle.text = "手机扫码登录手表"
-        tvQrSubtitle.text = "手机与手表连同一 Wi-Fi\n扫此码上传 CFluxDo 二维码"
+        tvQrTitle.text = if (cfSyncFirst) "同步 CF 过盾凭证" else "手机扫码登录手表"
+        tvQrSubtitle.text = if (cfSyncFirst) {
+            "同 Wi-Fi 电脑/手机打开下方网址或扫码\n同步 cf_clearance 与浏览器 UA"
+        } else {
+            "手机与手表连同一 Wi-Fi\n扫此码上传 CFluxDo 二维码"
+        }
         btnQrAction.visibility = View.VISIBLE
         btnQrAction.text = "刷新二维码"
-        btnQrAction.setOnClickListener { startPhoneScanWatchMode() }
+        btnQrAction.setOnClickListener { startLanServerMode(cfSyncFirst) }
 
         lanServer?.stop()
         val server = LanQrLoginServer(
             protocol = app.qrProtocol,
+            discourse = app.discourse,
+            cfSyncFirst = cfSyncFirst,
             onStatusChange = { msg ->
                 runOnUiThread { tvQrStatus.text = msg }
             },
@@ -142,7 +160,16 @@ class QrLoginActivity : AppCompatActivity() {
                 runOnUiThread {
                     lanServer?.stop()
                     Toast.makeText(this, "登录成功：@$username", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
                     showLoggedInState()
+                }
+            },
+            onCfSyncSuccess = {
+                runOnUiThread {
+                    lanServer?.stop()
+                    Toast.makeText(this, "已同步 cf_clearance 与 UA", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
+                    finish()
                 }
             }
         )
@@ -161,7 +188,7 @@ class QrLoginActivity : AppCompatActivity() {
             }
             ivQrCode.setImageBitmap(bmp)
             qrCard.visibility = View.VISIBLE
-            tvQrStatus.text = "等待手机扫码…"
+            tvQrStatus.text = if (cfSyncFirst) "等待电脑/手机打开网址同步…" else "等待手机扫码…"
             tvQrUrlHint.text = url
         }
     }
@@ -257,6 +284,6 @@ class QrLoginActivity : AppCompatActivity() {
         app.prefs.cachedUsername = null
         app.prefs.cachedTrustLevel = 0
         Toast.makeText(this, "已退出登录", Toast.LENGTH_SHORT).show()
-        startPhoneScanWatchMode()
+        startLanServerMode(cfSyncFirst = false)
     }
 }
