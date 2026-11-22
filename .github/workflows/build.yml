@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -98,10 +100,55 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${GITHUB_REF_NAME}"
+          NOTES_FILE="${RUNNER_TEMP}/release-notes.md"
+
+          # Extract curated section from CHANGELOG.md if present for this tag
+          CURATED=""
+          if [ -f CHANGELOG.md ]; then
+            CURATED="$(awk -v tag="${TAG}" '
+              $0 == "## " tag { flag=1; next }
+              flag && /^## / { exit }
+              flag { print }
+            ' CHANGELOG.md)"
+          fi
+
+          PREV_TAG="$(git tag --sort=-creatordate | grep -v "^${TAG}$" | head -n 1 || true)"
+          if [ -n "${PREV_TAG}" ]; then
+            COMMITS="$(git log "${PREV_TAG}..HEAD" --pretty=format:'- %s (%h)' --no-merges)"
+          else
+            COMMITS="$(git log -n 20 --pretty=format:'- %s (%h)' --no-merges)"
+          fi
+
+          {
+            echo "## CFluxDo Watch ${TAG}"
+            echo ""
+            if [ -n "${CURATED}" ]; then
+              echo "${CURATED}"
+              echo ""
+            fi
+            if [ -n "${COMMITS}" ]; then
+              echo "### 提交记录（Commits）"
+              if [ -n "${PREV_TAG}" ]; then
+                echo "自 \`${PREV_TAG}\` 以来的改动："
+                echo ""
+              fi
+              echo "${COMMITS}"
+              echo ""
+            fi
+            echo "### 安装包说明"
+            echo "- \`app-arm64-v8a-release.apk\`：**推荐优先安装**（原生 64 位，体积最小，适用于 OPPO Watch X2 等 64 位手表）"
+            echo "- \`app-armeabi-v7a-release.apk\`：32 位 ARM 兼容包"
+            echo "- \`app-universal-release.apk\`：全架构通用包"
+            echo "- \`SHA256SUMS.txt\`：安装包校验值"
+            echo ""
+            echo "> **原作者项目声明**：本项目基于 [1molchuan/CFluxDo](https://github.com/1molchuan/CFluxDo)（及 [1molchuan/fluxdo_doh](https://github.com/1molchuan/fluxdo_doh)）精简移植，原始上游为 [Lingyan000/fluxdo](https://github.com/Lingyan000/fluxdo)，遵循 GPL-3.0 协议开源。"
+          } > "${NOTES_FILE}"
+
           if gh release view "${TAG}" >/dev/null 2>&1; then
+            gh release edit "${TAG}" --title "CFluxDo Watch ${TAG}" --notes-file "${NOTES_FILE}"
             gh release upload "${TAG}" dist/* --clobber
           else
             gh release create "${TAG}" dist/* \
               --title "CFluxDo Watch ${TAG}" \
-              --generate-notes
+              --notes-file "${NOTES_FILE}"
           fi
