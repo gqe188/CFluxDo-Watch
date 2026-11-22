@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pure OLED black for maximum power saving and zero thermal overhead on OPPO Watch X2 -->
+    <color name="oled_bg">#000000</color>
+    <color name="surface_card">#141416</color>
+    <color name="surface_card_pressed">#222226</color>
+    <color name="surface_pill">#1C1C20</color>
+    <color name="surface_quote">#181715</color>
+    <color name="surface_code">#121318</color>
+    <color name="divider">#232328</color>
+
+    <!-- Mojian-inspired warm high-contrast reading palette -->
+    <color name="text_primary">#EDE9E0</color>
+    <color name="text_secondary">#9A9892</color>
+    <color name="text_muted">#6E6D69</color>
+
+    <!-- Warm amber accent -->
+    <color name="accent">#E0A24D</color>
+    <color name="accent_soft">#2B2214</color>
+    <color name="accent_blue">#6FA8DC</color>
+    <color name="status_ok">#5CC983</color>
+    <color name="status_warn">#E6A756</color>
+    <color name="status_err">#E06C75</color>
+</resources>

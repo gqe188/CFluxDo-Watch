@@ -1,0 +1,16 @@
+.gradle/
+.kotlin/
+build/
+app/build/
+app/.cxx/
+.cxx/
+.externalNativeBuild/
+local.properties
+upstream-CFluxDo/
+*.iml
+.idea/
+.DS_Store
+*.hprof
+*.keystore
+*.jks
+captures/

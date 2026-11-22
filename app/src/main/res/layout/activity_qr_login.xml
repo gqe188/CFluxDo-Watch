@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/oled_bg"
+    android:fillViewport="true"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="56dp">
+
+        <TextView
+            android:id="@+id/tvQrTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/qr_login"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tvQrSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp"
+            android:gravity="center"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- High-contrast white QR card sized to fit inside inscribed square of 466x466 round watch -->
+        <FrameLayout
+            android:id="@+id/qrCard"
+            android:layout_width="146dp"
+            android:layout_height="146dp"
+            android:background="@drawable/bg_qr_card"
+            android:padding="8dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/ivQrCode"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:contentDescription="QR Code" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvQrStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/accent"
+            android:textSize="11sp"
+            android:gravity="center"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/tvQrUrlHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_muted"
+            android:textSize="10sp"
+            android:gravity="center"
+            android:layout_marginTop="3dp" />
+
+        <!-- Logged-in account info panel -->
+        <LinearLayout
+            android:id="@+id/loggedInPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvLoggedInUser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/status_ok"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/btnShareQr"
+                style="@style/WatchPillButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_pill_accent"
+                android:textColor="@color/accent"
+                android:text="展示 CFluxDo 登录码"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/btnLogout"
+                style="@style/WatchPillButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/status_err"
+                android:text="退出登录" />
+        </LinearLayout>
+
+        <!-- Action button when not logged in or refreshing -->
+        <TextView
+            android:id="@+id/btnQrAction"
+            style="@style/WatchPillButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="刷新二维码" />
+
+    </LinearLayout>
+</ScrollView>

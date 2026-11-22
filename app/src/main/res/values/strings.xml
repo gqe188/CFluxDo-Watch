@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CFluxDo</string>
+    <string name="tab_latest">最新</string>
+    <string name="tab_hot">热门</string>
+    <string name="tab_unread">未读</string>
+    <string name="tab_categories">分类</string>
+    <string name="loading">加载中…</string>
+    <string name="load_more">加载更多</string>
+    <string name="no_more">没有更多了</string>
+    <string name="retry">重试</string>
+    <string name="qr_login">扫码登录</string>
+    <string name="settings">设置</string>
+    <string name="cf_verify">Cloudflare 验证</string>
+    <string name="only_op">仅看楼主</string>
+    <string name="all_posts">全部楼层</string>
+    <string name="tap_to_load_image">点击加载图片</string>
+</resources>

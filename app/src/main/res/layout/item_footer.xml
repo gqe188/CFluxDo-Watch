@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingTop="6dp"
+    android:paddingBottom="10dp">
+
+    <TextView
+        android:id="@+id/tvFooterMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/btnFooterAction"
+        style="@style/WatchPillButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/load_more" />
+
+    <TextView
+        android:id="@+id/btnFooterCf"
+        style="@style/WatchPillButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_pill_accent"
+        android:textColor="@color/accent"
+        android:text="@string/cf_verify"
+        android:visibility="gone" />
+
+</LinearLayout>

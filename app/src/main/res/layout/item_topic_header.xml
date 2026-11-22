@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/tvTopicTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:lineSpacingMultiplier="1.2"
+        android:gravity="center"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp" />
+
+    <TextView
+        android:id="@+id/tvTopicMeta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="11sp"
+        android:gravity="center"
+        android:layout_marginTop="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:id="@+id/btnFontDec"
+            style="@style/WatchPillButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="A-"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/btnFontInc"
+            style="@style/WatchPillButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="A+"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/btnOnlyOp"
+            style="@style/WatchPillButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/only_op" />
+    </LinearLayout>
+
+</LinearLayout>

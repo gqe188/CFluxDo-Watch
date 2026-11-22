@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CFluxDoWatch" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/oled_bg</item>
+        <item name="android:colorBackground">@color/oled_bg</item>
+        <item name="android:statusBarColor">@color/oled_bg</item>
+        <item name="android:navigationBarColor">@color/oled_bg</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowSwipeToDismiss">true</item>
+    </style>
+
+    <style name="WatchPillButton">
+        <item name="android:background">@drawable/bg_pill</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:minHeight">30dp</item>
+    </style>
+</resources>
