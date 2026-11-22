@@ -2,6 +2,14 @@
 
 本项目基于 **[1molchuan/CFluxDo](https://github.com/1molchuan/CFluxDo)**（及 [1molchuan/fluxdo_doh](https://github.com/1molchuan/fluxdo_doh)）精简移植，原始上游为 **[Lingyan000/fluxdo](https://github.com/Lingyan000/fluxdo)**。
 
+## v1.0.3-watch
+
+### 问题修复与优化
+- **修复帖子表情包与自定义表情不渲染的问题**：
+  - 移除原先把 `img.emoji` 直接替换成纯文本 `:shortcode:` 的逻辑，改为通过原生 `ImageSpan` 内联异步渲染 Discourse 标准表情、Linux.do 自定义表情包（`emoji-custom`）与大号独立表情（`only-emoji`），同时支持引用块内的表情渲染。
+  - 新增小尺寸贴纸图片（如第三方表情包）自动识别与透明背景渲染（`ARGB_8888`），默认省电模式下也会自动加载表情包，大图/截图仍保持「点击加载」省电策略。
+  - 修复 `DiscourseClient.downloadBytes` 未跟随 `301/302` 重定向导致部分短链/CDN 表情与图片加载失败的问题，并增加同 URL 并发请求合并与缓存同步命中（滚动零闪烁）。
+
 ## v1.0.2-watch
 
 ### 新功能与优化

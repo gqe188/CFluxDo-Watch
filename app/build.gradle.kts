@@ -13,8 +13,8 @@ android {
         // Compatible with OPPO Watch X2 (ColorOS Watch 7.0 / Wear OS 5) and older Wear OS watches
         minSdk = 26
         targetSdk = 34
-        versionCode = 102
-        versionName = "1.0.2-watch"
+        versionCode = 103
+        versionName = "1.0.3-watch"
 
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")

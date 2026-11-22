@@ -227,19 +227,29 @@ class DiscourseClient(
         }
 
     suspend fun downloadBytes(rawUrl: String): ByteArray = withContext(Dispatchers.IO) {
-        val fullUrl = resolveUrl(rawUrl)
-        val req = Request.Builder()
-            .url(fullUrl)
-            .header("Accept", "image/webp,image/png,image/jpeg,image/*,*/*;q=0.8")
-            .header("Referer", "$BASE_URL/")
-            .get()
-            .build()
-        httpClient.newCall(req).execute().use { resp ->
-            if (!resp.isSuccessful) {
-                throw IOException("图片下载失败 HTTP ${resp.code}")
+        var currentUrl = resolveUrl(rawUrl)
+        repeat(5) {
+            val req = Request.Builder()
+                .url(currentUrl)
+                .header("Accept", "image/webp,image/png,image/jpeg,image/gif,image/*,*/*;q=0.8")
+                .header("Referer", "$BASE_URL/")
+                .get()
+                .build()
+            httpClient.newCall(req).execute().use { resp ->
+                if (resp.code in 300..399) {
+                    val loc = resp.header("Location")?.trim()
+                    if (!loc.isNullOrEmpty()) {
+                        currentUrl = resolveUrl(loc)
+                        return@use
+                    }
+                }
+                if (!resp.isSuccessful) {
+                    throw IOException("图片下载失败 HTTP ${resp.code}")
+                }
+                return@withContext resp.body?.bytes() ?: throw IOException("空图片响应")
             }
-            resp.body?.bytes() ?: throw IOException("空图片响应")
         }
+        throw IOException("图片重定向次数过多")
     }
 
     private fun executeChecked(request: Request, allowRedirect: Boolean = false): RawHttpResult {

@@ -4,8 +4,14 @@ import android.app.Dialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
+import android.os.Build
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import android.text.style.DynamicDrawableSpan
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -27,6 +33,7 @@ import com.cfluxdo.watch.model.PostItem
 import com.cfluxdo.watch.model.TopicDetailData
 import com.cfluxdo.watch.net.CfChallengeException
 import com.cfluxdo.watch.render.DiscourseHtmlRenderer
+import com.cfluxdo.watch.render.InlineEmoji
 import com.cfluxdo.watch.render.PostBlock
 import com.cfluxdo.watch.util.TimeFormat
 import kotlinx.coroutines.CoroutineScope
@@ -208,13 +215,78 @@ class TopicDetailActivity : AppCompatActivity() {
         dialog.show()
 
         uiScope.launch {
-            val bmp = app.imageLoader.load(url, maxWidthPx = 460)
+            val bmp = app.imageLoader.load(url, maxWidthPx = 460, preserveAlpha = true)
             if (!dialog.isShowing) return@launch
             if (bmp != null) {
                 iv.setImageBitmap(bmp)
                 hint.text = "点击关闭"
             } else {
                 hint.text = "图片加载失败，点击关闭"
+            }
+        }
+    }
+
+    private fun buildEmojiSpan(tv: TextView, bmp: Bitmap, isLarge: Boolean): ImageSpan {
+        val targetH = (tv.textSize * if (isLarge) 2.25f else 1.38f).toInt().coerceAtLeast(16)
+        val bmpH = bmp.height.coerceAtLeast(1)
+        val targetW = ((targetH.toFloat() * bmp.width / bmpH).toInt())
+            .coerceIn(targetH / 2, targetH * 3)
+        val drawable = BitmapDrawable(resources, bmp)
+        drawable.setBounds(0, 0, targetW, targetH)
+        val align = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            DynamicDrawableSpan.ALIGN_CENTER
+        } else {
+            DynamicDrawableSpan.ALIGN_BOTTOM
+        }
+        return ImageSpan(drawable, align)
+    }
+
+    private fun bindTextWithEmojis(
+        tv: TextView,
+        baseText: CharSequence,
+        emojis: List<InlineEmoji>,
+        offset: Int = 0,
+        bindToken: Any
+    ) {
+        tv.tag = bindToken
+        if (emojis.isEmpty()) {
+            tv.text = baseText
+            return
+        }
+
+        val ssb = SpannableStringBuilder(baseText)
+        val pending = mutableListOf<InlineEmoji>()
+        for (e in emojis) {
+            val start = e.start + offset
+            val end = e.end + offset
+            if (start < 0 || end > ssb.length || start >= end) continue
+            val maxPx = if (e.isLarge) 128 else 84
+            val cached = app.imageLoader.getCachedEmoji(e.url, maxSizePx = maxPx)
+            if (cached != null) {
+                ssb.setSpan(buildEmojiSpan(tv, cached, e.isLarge), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            } else {
+                pending.add(e)
+            }
+        }
+        tv.text = ssb
+
+        if (pending.isEmpty()) return
+
+        uiScope.launch {
+            var updated = false
+            for (e in pending) {
+                val maxPx = if (e.isLarge) 128 else 84
+                val bmp = app.imageLoader.loadEmoji(e.url, maxSizePx = maxPx) ?: continue
+                if (tv.tag != bindToken) return@launch
+                val start = e.start + offset
+                val end = e.end + offset
+                if (start in 0 until end && end <= ssb.length) {
+                    ssb.setSpan(buildEmojiSpan(tv, bmp, e.isLarge), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    updated = true
+                }
+            }
+            if (updated && tv.tag == bindToken) {
+                tv.text = ssb
             }
         }
     }
@@ -312,11 +384,10 @@ class TopicDetailActivity : AppCompatActivity() {
             val dp6 = RotaryHelper.dp(contentContainer, 6)
             val dp8 = RotaryHelper.dp(contentContainer, 8)
 
-            for (block in blocks) {
+            for ((blockIdx, block) in blocks.withIndex()) {
                 when (block) {
                     is PostBlock.RichText -> {
                         val tv = TextView(this@TopicDetailActivity).apply {
-                            text = block.spanned
                             textSize = fontSize
                             setTextColor(ContextCompat.getColor(context, R.color.text_primary))
                             setLinkTextColor(ContextCompat.getColor(context, R.color.accent_blue))
@@ -324,18 +395,31 @@ class TopicDetailActivity : AppCompatActivity() {
                             movementMethod = LinkMovementMethod.getInstance()
                             setPadding(0, 0, 0, dp6)
                         }
+                        bindTextWithEmojis(
+                            tv = tv,
+                            baseText = block.spanned,
+                            emojis = block.emojis,
+                            offset = 0,
+                            bindToken = "${post.id}:rt:$blockIdx"
+                        )
                         contentContainer.addView(tv)
                     }
                     is PostBlock.Quote -> {
+                        val header = if (block.author.isNotBlank()) "${block.author}\n" else ""
                         val box = TextView(this@TopicDetailActivity).apply {
-                            val header = if (block.author.isNotBlank()) "${block.author}\n" else ""
-                            text = "$header${block.text}"
                             textSize = (fontSize - 2f).coerceAtLeast(11f)
                             setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
                             setBackgroundResource(R.drawable.bg_quote)
                             setPadding(dp8, dp6, dp8, dp6)
                             setLineSpacing(0f, 1.18f)
                         }
+                        bindTextWithEmojis(
+                            tv = box,
+                            baseText = "$header${block.text}",
+                            emojis = block.emojis,
+                            offset = header.length,
+                            bindToken = "${post.id}:qt:$blockIdx"
+                        )
                         val lp = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
@@ -391,22 +475,39 @@ class TopicDetailActivity : AppCompatActivity() {
                         contentContainer.addView(tv, lp)
                     }
                     is PostBlock.Image -> {
-                        if (autoImg) {
+                        if (block.isSticker || autoImg) {
+                            val isSticker = block.isSticker
+                            val imgToken = "${post.id}:img:$blockIdx:${block.url}"
                             val iv = ImageView(this@TopicDetailActivity).apply {
+                                tag = imgToken
                                 adjustViewBounds = true
-                                maxHeight = RotaryHelper.dp(this, 160)
+                                maxHeight = RotaryHelper.dp(this, if (isSticker) 84 else 160)
+                                if (isSticker) {
+                                    maxWidth = RotaryHelper.dp(this, 140)
+                                }
                                 scaleType = ImageView.ScaleType.FIT_CENTER
                                 setOnClickListener { showImageViewer(block.url) }
                             }
                             val lp = LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                if (isSticker) LinearLayout.LayoutParams.WRAP_CONTENT else LinearLayout.LayoutParams.MATCH_PARENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT
                             ).apply { bottomMargin = dp6 }
                             contentContainer.addView(iv, lp)
-                            uiScope.launch {
-                                val bmp: Bitmap? = app.imageLoader.load(block.url, maxWidthPx = 320)
-                                if (bmp != null) {
-                                    iv.setImageBitmap(bmp)
+
+                            val maxW = if (isSticker) 160 else 320
+                            val cached = app.imageLoader.getCached(block.url, maxWidthPx = maxW, preserveAlpha = isSticker)
+                            if (cached != null) {
+                                iv.setImageBitmap(cached)
+                            } else {
+                                uiScope.launch {
+                                    val bmp: Bitmap? = app.imageLoader.load(
+                                        block.url,
+                                        maxWidthPx = maxW,
+                                        preserveAlpha = isSticker
+                                    )
+                                    if (bmp != null && iv.tag == imgToken) {
+                                        iv.setImageBitmap(bmp)
+                                    }
                                 }
                             }
                         } else {

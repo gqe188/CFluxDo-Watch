@@ -2,8 +2,10 @@ package com.cfluxdo.watch
 
 import com.cfluxdo.watch.net.CfChallengeDetector
 import com.cfluxdo.watch.net.ClientHints
+import com.cfluxdo.watch.render.DiscourseEmojiHelper
 import com.cfluxdo.watch.ui.RotaryScrollAccumulator
 import com.cfluxdo.watch.ui.RotaryScrollMath
+import org.jsoup.Jsoup
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -97,5 +99,35 @@ class CoreLogicTest {
 
         val e2 = acc.consume(10f, eventTimeMs = 260L, canScrollInDirection = false)
         assertFalse(e2.shouldEdgeHaptic)
+    }
+
+    @Test
+    fun discourseEmojiTokenizationAndStickerClassification() {
+        val html = """
+            <p>你好 <img src="https://linux.do/uploads/default/original/doge.png" class="emoji emoji-custom" alt=":doge:"> 世界</p>
+            <p><img src="https://linux.do/images/emoji/twemoji/smile.png" class="emoji only-emoji" alt=":smile:"></p>
+            <p><img src="https://cdn.linux.do/sticker.webp" width="80" height="80" alt="贴纸"></p>
+            <p><img src="https://cdn.linux.do/photo.jpg" width="1200" height="800" alt="screenshot"></p>
+        """.trimIndent()
+        val body = Jsoup.parseBodyFragment(html).body()
+        val tokens = DiscourseEmojiHelper.tokenizeEmojis(body)
+
+        assertEquals(2, tokens.size)
+        assertEquals("https://linux.do/uploads/default/original/doge.png", tokens[0].url)
+        assertEquals(":doge:", tokens[0].alt)
+        assertFalse(tokens[0].isLarge)
+
+        assertEquals("https://linux.do/images/emoji/twemoji/smile.png", tokens[1].url)
+        assertTrue(tokens[1].isLarge)
+
+        val resolved = DiscourseEmojiHelper.resolvePlainText(body.select("p")[0].text(), tokens)
+        assertEquals("你好 :doge: 世界", resolved.text)
+        assertEquals(1, resolved.emojis.size)
+        assertEquals(":doge:", resolved.text.substring(resolved.emojis[0].start, resolved.emojis[0].end))
+
+        val remainingImgs = body.select("img")
+        assertEquals(2, remainingImgs.size)
+        assertTrue(DiscourseEmojiHelper.isSmallStickerImage(remainingImgs[0]))
+        assertFalse(DiscourseEmojiHelper.isSmallStickerImage(remainingImgs[1]))
     }
 }
